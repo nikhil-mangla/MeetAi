@@ -1,10 +1,49 @@
+"use client";
 
+import { useState } from "react";
 
-export default function Home() {
-  return (
+import { authClient } from "@/lib/auth-client";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+
+/**
+ * Renders a user sign-up form with fields for name, email, and password, and handles user registration.
+ *
+ * Collects user input and submits it to the authentication client. Displays an alert indicating whether the sign-up was successful or failed.
+ */
+export default function Home(){
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const onSubmit = () => {
+    authClient.signUp.email({
+      email, // user email address
+      password, // user password -> min 8 characters by default
+      name, 
+    },
+    {
+      onError: () => {
+        window.alert("signup failed");
+      },
+      onSuccess: () => {
+        window.alert("success")
+      }
+      
+    })
+  }
+
+  return(
     <div>
-  hello world!
- </div>
+      <Input placeholder="name" value={name} onChange={(e) => setName(e.target.value)} />
+      <Input placeholder="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+      <Input placeholder="password" type="password" value={password} onChange = {(e) => setPassword(e.target.value)} />
+
+      <Button onClick={onSubmit}>
+        create user
+      </Button>
+      
+    </div>
   )
- 
 }
