@@ -7,6 +7,11 @@ import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+/**
+ * Renders a user sign-up form with fields for name, email, and password, and handles user registration.
+ *
+ * Collects user input and submits it to the authentication client. Displays an alert indicating whether the sign-up was successful or failed.
+ */
 export default function Home(){
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
