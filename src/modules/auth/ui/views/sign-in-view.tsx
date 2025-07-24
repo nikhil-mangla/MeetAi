@@ -4,15 +4,17 @@ import {z} from "zod";
 import Link from "next/link";
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { OctagonAlertIcon } from "lucide-react";
+import { FaGithub, FaGoogle } from "react-icons/fa";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
+
 
 
 const formSchema = z.object ({
@@ -33,6 +35,7 @@ export const SignInView = () => {
       password: "",
     },
   });
+  
 
   const onSubmit = async(data: z.infer<typeof formSchema>) => {
     setError(null);
@@ -40,14 +43,40 @@ export const SignInView = () => {
     authClient.signIn.email(
         {
             email: data.email,
-            password: data.password
+            password: data.password,
+            callbackURL: "/",
         },
         {
             onSuccess: () => {
                 setPending(false);
-                router.push("/");
+                router.push("/")
+                
             },
-            onError: ({ error }) => {
+            onError: ({ error }: { error: { message: string } }) => {
+                setPending(false);
+                setError(error.message)
+            }
+        },
+    );
+    
+  };
+
+  const onSocial = (provider: "github" | "google") => {
+
+  
+    setError(null);
+    setPending(true);
+    authClient.signIn.social(
+        {
+            provider: provider,
+            callbackURL: "/",
+        },
+        {
+            onSuccess: () => {
+                setPending(false);
+                
+            },
+            onError: ({ error }: { error: { message: string } }) => {
                 setPending(false);
                 setError(error.message)
             }
@@ -126,27 +155,30 @@ export const SignInView = () => {
                                         >
                                             Sign in
                                         </Button>
-                                        <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after: flex after:items-center after: border-t">
-                                            <span className="bg-card text-muted-foreground relative z-10 px-2">
-                                               Or continue with
-                                            </ span>
+                                        <div className="relative flex items-center justify-center text-center text-sm my-4">
+                                            <div className="flex-grow border-t border-border"></div>
+                                            <span className="bg-card text-muted-foreground px-2 z-10">
+                                                Or continue with
+                                            </span>
+                                            <div className="flex-grow border-t border-border"></div>
                                         </div>
-                                        <div className="grid grid-cols-2 gap-4">
-                                           <Button disabled={pending} variant="outline" type="button" className="w-1/2">
-                                           
-                                                Google
-                                           </Button>
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-4">
-                                           <Button disabled={pending} variant="outline" type="button" className="w-1/2">
-                                           
-                                                Github
-                                           </Button>
+                                        <div className="flex gap-2">
+                                            <Button disabled={pending}
+                                            onClick={() => onSocial("google")}
+                                            variant="outline" type="button" className="w-1/2">
+                                                <FaGoogle />
+                                            </Button>
+                                            <Button disabled={pending} 
+                                           onClick={() => onSocial("github")}
+                                            variant="outline" type="button" className="w-1/2">
+                                                <FaGithub />
+                                            </Button>
                                         </div>
                                         <div className="text-center text-sm">
                                             Don&apos;t have an account?{" "}
-                                            <Link href="/sign-up" className="underline underline-offset-4"></Link>
+                                            <Link href="/sign-up" className="underline underline-offset-4">
                                             Sign up
+                                            </Link>
                                         </div>
                                 </div>
                             </div>
@@ -166,7 +198,7 @@ export const SignInView = () => {
 
             </Card>
             <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-                By clicking continue, you agree to our <a href="#">Terms of service</a> and <a href="#">Privacy p</a>
+                By clicking continue, you agree to our <a href="#">Terms of service</a> and <a href="#">Privacy Policy</a>
             </div>
 
         </div>

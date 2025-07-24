@@ -4,14 +4,16 @@ import {z} from "zod";
 import Link from "next/link";
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { OctagonAlertIcon } from "lucide-react";
+import { FaGithub, FaGoogle } from "react-icons/fa";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
+
 import { useState } from "react";
 
 
@@ -52,14 +54,39 @@ export const SignUpView = () => {
         {
             name: data.name,
             email: data.email,
-            password: data.password
+            password: data.password,
+            callbackURL: "/"
         },
         {
             onSuccess: () => {
                 setPending(false);
                 router.push("/");
             },
-            onError: ({ error }) => {
+            onError: ({ error }: { error: { message: string } }) => {
+                setPending(false);
+                setError(error.message);
+            }
+        },
+    );
+    
+  };
+
+  const onSocial = (provider: "github" | "google") => {
+
+  
+    setError(null);
+    setPending(true);
+     authClient.signIn.social(
+        {
+            provider: provider,
+            callbackURL: "/",
+        },
+        {
+            onSuccess: () => {
+                setPending(false);
+                
+            },
+            onError: ({ error }: { error: { message: string } }) => {
                 setPending(false);
                 setError(error.message)
             }
@@ -179,23 +206,30 @@ export const SignUpView = () => {
                                         >
                                             Sign in
                                         </Button>
-                                        <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after: flex after:items-center after: border-t">
-                                            <span className="bg-card text-muted-foreground relative z-10 px-2">
-                                               Or continue with
-                                            </ span>
+                                        <div className="relative flex items-center justify-center text-center text-sm my-4">
+                                            <div className="flex-grow border-t border-border"></div>
+                                            <span className="bg-card text-muted-foreground px-2 z-10">
+                                                Or continue with
+                                            </span>
+                                            <div className="flex-grow border-t border-border"></div>
                                         </div>
                                         <div className="flex gap-2">
-                                            <Button disabled={pending} variant="outline" type="button" className="w-1/2">
-                                                Google
+                                            <Button disabled={pending}
+                                            onClick={() => onSocial("google")}
+                                            variant="outline" type="button" className="w-1/2">
+                                                <FaGoogle />
                                             </Button>
-                                            <Button disabled={pending} variant="outline" type="button" className="w-1/2">
-                                                Github
+                                            <Button disabled={pending}
+                                            onClick={() => onSocial("github")}
+                                            variant="outline" type="button" className="w-1/2">
+                                                <FaGithub />
                                             </Button>
                                         </div>
                                         <div className="text-center text-sm">
                                             Already have an account?{" "}
-                                            <Link href="/sign-up"className="underline underline-offset-4"></Link>
-                                            Sign in
+                                            <Link href="/sign-in" className="underline underline-offset-4">
+                                                Sign in
+                                            </Link>
                                         </div>
                                 </div>
                             </div>
